@@ -18,8 +18,7 @@ pub fn build(b: *std.build.Builder) void {
             @compileError("Platform not supported");
         },
     }
-    exe.addCSourceFile("libs/glad/src/glad.c", &[_][]const u8{"-std=c99"});
-    exe.addIncludeDir("libs/glad/include");
+    exe.linkSystemLibrary("epoxy");
     exe.linkSystemLibrary("glfw3");
     exe.linkLibC();
 
