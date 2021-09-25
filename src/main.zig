@@ -1,14 +1,16 @@
 const std = @import("std");
-const c = @cImport({
-    @cInclude("epoxy/gl.h");
-    @cInclude("GLFW/glfw3.h");
-});
+const c = @import("c.zig");
+const panic = std.debug.panic;
+const ShaderProgram = @import("shader.zig").ShaderProgram;
 
 const vertices = [_]f32{
     0.5, -0.5, 0.0, 1.0, 0.0, 0.0,
     -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
     0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
 };
+
+const vertex_shader = @embedFile("shader.vert");
+const fragment_shader = @embedFile("shader.frag");
 
 pub fn main() anyerror!void {
     _ = c.glfwInit();
@@ -18,7 +20,7 @@ pub fn main() anyerror!void {
 
     const window = c.glfwCreateWindow(800, 600, "Learn OpenGL", null, null) orelse {
         c.glfwTerminate();
-        @panic("Failed to create GLFW window");
+        panic("Failed to create GLFW window", .{});
     };
     defer c.glfwTerminate();
     c.glfwMakeContextCurrent(window);
@@ -38,36 +40,38 @@ pub fn main() anyerror!void {
     c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(1);
 
-    const vertexShaderSource = @embedFile("shader.vert");
-    const vertexShader = c.glCreateShader(c.GL_VERTEX_SHADER);
-    defer c.glDeleteShader(vertexShader);
-    c.glShaderSource(vertexShader, 1, @ptrCast([*c]const [*c]const u8, &vertexShaderSource), null);
-    c.glCompileShader(vertexShader);
-    var success: c_int = undefined;
-    c.glGetShaderiv(vertexShader, c.GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        @panic("Error: shader vertex compilation failedn");
-    }
+    const shader = ShaderProgram.fromSource(vertex_shader, fragment_shader);
 
-    const fragmentShaderSource = @embedFile("shader.frag");
-    const fragmentShader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
-    defer c.glDeleteShader(fragmentShader);
-    c.glShaderSource(fragmentShader, 1, @ptrCast([*c]const [*c]const u8, &fragmentShaderSource), null);
-    c.glCompileShader(fragmentShader);
-    c.glGetShaderiv(fragmentShader, c.GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        @panic("Error: shader fragment compilation failedn");
-    }
+    //const vertex_shader_source = @embedFile("shader.vert");
+    //const vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
+    //defer c.glDeleteShader(vertex_shader);
+    //c.glShaderSource(vertex_shader, 1, &[_][*c]const u8{vertex_shader_source}, null);
+    //c.glCompileShader(vertex_shader);
+    //var success: c_int = undefined;
+    //c.glGetShaderiv(vertex_shader, c.GL_COMPILE_STATUS, &success);
+    //if (success == @boolToInt(false)) {
+    //    panic("Error: shader vertex compilation failedn");
+    //}
 
-    var shaderProgram: c_uint = c.glCreateProgram();
-    c.glAttachShader(shaderProgram, vertexShader);
-    c.glAttachShader(shaderProgram, fragmentShader);
-    c.glLinkProgram(shaderProgram);
+    //const fragment_shader_source = @embedFile("shader.frag");
+    //const fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
+    //defer c.glDeleteShader(fragment_shader);
+    //c.glShaderSource(fragment_shader, 1, &[_][*c]const u8{fragment_shader_source}, null);
+    //c.glCompileShader(fragment_shader);
+    //c.glGetShaderiv(fragment_shader, c.GL_COMPILE_STATUS, &success);
+    //if (success == @boolToInt(false)) {
+    //    panic("Error: shader fragment compilation failedn");
+    //}
 
-    c.glGetProgramiv(shaderProgram, c.GL_LINK_STATUS, &success);
-    if (success == 0) {
-        @panic("Error: shader program link failed");
-    }
+    //var shader_program: c_uint = c.glCreateProgram();
+    //c.glAttachShader(shader_program, vertex_shader);
+    //c.glAttachShader(shader_program, fragment_shader);
+    //c.glLinkProgram(shader_program);
+
+    //c.glGetProgramiv(shader_program, c.GL_LINK_STATUS, &success);
+    //if (success == @boolToInt(false)) {
+    //    panic("Error: shader program link failed");
+    //}
 
     while (c.glfwWindowShouldClose(window) != 1) {
         processInput(window);
@@ -75,7 +79,7 @@ pub fn main() anyerror!void {
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
 
-        c.glUseProgram(shaderProgram);
+        c.glUseProgram(shader.id);
         c.glBindVertexArray(vao);
         c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
 
