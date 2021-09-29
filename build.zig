@@ -20,6 +20,8 @@ pub fn build(b: *std.build.Builder) void {
     }
     exe.linkSystemLibrary("epoxy");
     exe.linkSystemLibrary("glfw3");
+    exe.addCSourceFile("deps/stb/stb_image.c", &.{"-std=c99"});
+    exe.addIncludeDir("deps/stb");
     exe.linkLibC();
 
     exe.setTarget(target);
