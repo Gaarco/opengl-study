@@ -1,4 +1,5 @@
 const std = @import("std");
+const zalgebra = @import("zalgebra");
 const c = @import("c.zig");
 const panic = std.debug.panic;
 const ShaderProgram = @import("shader.zig").ShaderProgram;
