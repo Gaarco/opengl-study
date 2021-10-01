@@ -2,16 +2,18 @@ const std = @import("std");
 const zalgebra = @import("zalgebra");
 const c = @import("c.zig");
 const panic = std.debug.panic;
+const Vec3 = zalgebra.Vec3;
+const Mat4 = zalgebra.Mat4;
 const ShaderProgram = @import("shader.zig").ShaderProgram;
 
 const vertices = [_]f32{
-    0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
-    0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0,
+    0.5,  0.5,  0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+    0.5,  -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0,
     -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-    -0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+    -0.5, 0.5,  0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
 };
 
-const indices = [_]c_uint {
+const indices = [_]c_uint{
     0, 1, 3,
     1, 2, 3,
 };
@@ -31,6 +33,7 @@ pub fn main() anyerror!void {
     };
     defer c.glfwTerminate();
     c.glfwMakeContextCurrent(window);
+    c.glfwSwapInterval(0);
 
     c.glViewport(0, 0, 800, 600);
     _ = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -102,6 +105,10 @@ pub fn main() anyerror!void {
         c.glBindTexture(c.GL_TEXTURE_2D, texture1);
         c.glActiveTexture(c.GL_TEXTURE1);
         c.glBindTexture(c.GL_TEXTURE_2D, texture2);
+
+        const trans = Mat4.fromTranslate(Vec3.new(0.5, -0.5, 0.0))
+            .rotate(@floatCast(f32, c.glfwGetTime()), Vec3.new(0.0, 0.0, 1.0));
+        shader.setValue("transform", trans);
 
         shader.use();
         c.glBindVertexArray(vao);

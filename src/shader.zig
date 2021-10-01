@@ -1,5 +1,6 @@
 const std = @import("std");
 const c = @import("c.zig");
+const zalgebra = @import("zalgebra");
 const panic = std.debug.panic;
 
 pub const ShaderProgram = struct {
@@ -9,13 +10,13 @@ pub const ShaderProgram = struct {
 
     // TODO doesn't work, shader compilation fails
     pub fn fromPath(allocator: *std.mem.Allocator, vertex_path: []const u8, fragment_path: []const u8) !Self {
-        const vertex_file = try std.fs.cwd().openFile(vertex_path, .{.read = true});
+        const vertex_file = try std.fs.cwd().openFile(vertex_path, .{ .read = true });
         defer vertex_file.close();
         var vert_buf_reader = std.io.bufferedReader(vertex_file.reader());
         var vert_in_stream = vert_buf_reader.reader();
         const vertex_shader = vert_in_stream.readAllAlloc(allocator, 1024) catch unreachable;
 
-        const fragment_file = try std.fs.cwd().openFile(fragment_path, .{.read = true});
+        const fragment_file = try std.fs.cwd().openFile(fragment_path, .{ .read = true });
         defer fragment_file.close();
         var frag_buf_reader = std.io.bufferedReader(fragment_file.reader());
         var frag_in_stream = frag_buf_reader.reader();
@@ -61,7 +62,7 @@ pub const ShaderProgram = struct {
             panic("ERROR: Shader linking failed\n{s}", .{info_log});
         }
 
-        return .{.id = id};
+        return .{ .id = id };
     }
 
     pub fn use(self: Self) void {
@@ -73,11 +74,21 @@ pub const ShaderProgram = struct {
             .Int, .ComptimeInt => {
                 c.glUniform1i(c.glGetUniformLocation(self.id, name), value);
             },
-            .Float => {
+            .Float, .ComptimeFloat => {
                 c.glUniform1f(c.glGetUniformLocation(self.id, name), value);
             },
             .Bool => {
                 c.glUniform1i(c.glGetUniformLocation(self.id, name), @boolToInt(value));
+            },
+            .Struct => {
+                switch (@TypeOf(value)) {
+                    zalgebra.Mat4 => {
+                        c.glUniformMatrix4fv(c.glGetUniformLocation(self.id, name), 1, c.GL_FALSE, value.getData());
+                    },
+                    else => {
+                        panic("adadadaNot implemented for type: {}", .{@TypeOf(value)});
+                    },
+                }
             },
             else => {
                 panic("Not implemented for type: {}", .{@TypeOf(value)});
