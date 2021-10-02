@@ -4,7 +4,7 @@ const c = @import("c.zig");
 const panic = std.debug.panic;
 const Vec3 = zalgebra.Vec3;
 const Mat4 = zalgebra.Mat4;
-const ShaderProgram = @import("shader.zig").ShaderProgram;
+const ShaderProgram = @import("ShaderProgram.zig");
 
 const window_width = 800;
 const window_height = 600;
@@ -101,8 +101,8 @@ pub fn main() anyerror!void {
 
     const shader = ShaderProgram.fromSource(vertex_shader, fragment_shader);
 
-    const container = @embedFile("container.jpg");
-    const awesomeface = @embedFile("awesomeface.png");
+    const container = @embedFile("res/container.jpg");
+    const awesomeface = @embedFile("res/awesomeface.png");
     var width: c_int = undefined;
     var height: c_int = undefined;
     var nr_channels: c_int = undefined;
