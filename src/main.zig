@@ -5,6 +5,8 @@ const panic = std.debug.panic;
 const Vec3 = zalgebra.Vec3;
 const Mat4 = zalgebra.Mat4;
 const ShaderProgram = @import("ShaderProgram.zig");
+const Camera = @import("Camera.zig");
+const Direction = @import("Camera.zig").Direction;
 
 const window_width = 800;
 const window_height = 600;
@@ -66,6 +68,10 @@ const cube_positions = [_]Vec3{
     Vec3.new(-1.3, 1.0, -1.5),
 };
 
+var camera = Camera.init(Vec3.new(0.0, 0.0, 3.0), Vec3.up(), -90.0, 0.0);
+var last_x: f64 = 400.0;
+var last_y: f64 = 300.0;
+
 const vertex_shader = @embedFile("shaders/shader.vert");
 const fragment_shader = @embedFile("shaders/shader.frag");
 
@@ -85,6 +91,9 @@ pub fn main() anyerror!void {
     c.glEnable(c.GL_DEPTH_TEST);
     c.glViewport(0, 0, window_width, window_height);
     _ = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    c.glfwSetInputMode(window, c.GLFW_CURSOR, c.GLFW_CURSOR_DISABLED);
+    _ = c.glfwSetCursorPosCallback(window, mouseCallback);
+    _ = c.glfwSetScrollCallback(window, scrollCallback);
 
     var vbo: c_uint = undefined;
     var vao: c_uint = undefined;
@@ -137,11 +146,16 @@ pub fn main() anyerror!void {
     shader.setValue("inTexture1", 0);
     shader.setValue("inTexture2", 1);
 
-    const view = Mat4.fromTranslate(Vec3.new(0.0, 0.0, -3.0));
-    const projection = Mat4.perspective(45.0, window_width / window_height, 0.1, 100.0);
+    var delta_time: f32 = 0.0;
+    var last_frame_time: f32 = 0.0;
 
     while (c.glfwWindowShouldClose(window) != 1) {
-        processInput(window);
+        const current_frame_time = @floatCast(f32, c.glfwGetTime());
+
+        delta_time = current_frame_time - last_frame_time;
+        last_frame_time = current_frame_time;
+
+        processInput(window, delta_time);
 
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
@@ -151,10 +165,13 @@ pub fn main() anyerror!void {
         c.glActiveTexture(c.GL_TEXTURE1);
         c.glBindTexture(c.GL_TEXTURE_2D, texture2);
 
+        const view = camera.getViewMatrix();
+        const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
+
         shader.use();
-        c.glBindVertexArray(vao);
         shader.setValue("view", view);
         shader.setValue("projection", projection);
+        c.glBindVertexArray(vao);
         for (cube_positions) |pos, index| {
             const model = Mat4.fromTranslate(pos)
                 .rotate(@intToFloat(f32, index) * 20.0, Vec3.new(0.5, 1.0, 0.0));
@@ -173,8 +190,37 @@ fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) 
     c.glViewport(0, 0, width, height);
 }
 
-fn processInput(window: ?*c.GLFWwindow) void {
+fn mouseCallback(window: ?*c.GLFWwindow, pos_x: f64, pos_y: f64) callconv(.C) void {
+    _ = window;
+    var offset_x = pos_x - last_x;
+    var offset_y = last_y - pos_y;
+    last_x = pos_x;
+    last_y = pos_y;
+
+    camera.processMouseMovement(@floatCast(f32, offset_x), @floatCast(f32, offset_y));
+}
+
+fn scrollCallback(window: ?*c.GLFWwindow, offset_x: f64, offset_y: f64) callconv(.C) void {
+    _ = window;
+    _ = offset_x;
+    camera.processMouseScroll(@floatCast(f32, offset_y));
+}
+
+fn processInput(window: ?*c.GLFWwindow, delta_time: f32) void {
     if (c.glfwGetKey(window, c.GLFW_KEY_ESCAPE) == c.GLFW_PRESS) {
         c.glfwSetWindowShouldClose(window, 1);
+    }
+
+    if (c.glfwGetKey(window, c.GLFW_KEY_W) == c.GLFW_PRESS) {
+        camera.processKeyboard(Direction.forward, delta_time);
+    }
+    if (c.glfwGetKey(window, c.GLFW_KEY_S) == c.GLFW_PRESS) {
+        camera.processKeyboard(Direction.backward, delta_time);
+    }
+    if (c.glfwGetKey(window, c.GLFW_KEY_A) == c.GLFW_PRESS) {
+        camera.processKeyboard(Direction.left, delta_time);
+    }
+    if (c.glfwGetKey(window, c.GLFW_KEY_D) == c.GLFW_PRESS) {
+        camera.processKeyboard(Direction.right, delta_time);
     }
 }
