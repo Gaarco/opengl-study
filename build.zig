@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
@@ -6,7 +7,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const exe = b.addExecutable("opengl", "src/main.zig");
 
-    switch (std.builtin.os.tag) {
+    switch (builtin.os.tag) {
         .windows => {
             exe.linkSystemLibrary("opengl32");
         },
