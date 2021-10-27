@@ -1,60 +1,60 @@
 const std = @import("std");
-const zalgebra = @import("zalgebra");
+const za = @import("zalgebra");
 const c = @import("c.zig");
-const panic = std.debug.panic;
-const Vec3 = zalgebra.Vec3;
-const Mat4 = zalgebra.Mat4;
 const ShaderProgram = @import("ShaderProgram.zig");
 const Camera = @import("Camera.zig");
 const Direction = @import("Camera.zig").Direction;
+const Vec3 = za.Vec3;
+const Mat4 = za.Mat4;
 
 const window_width = 800;
 const window_height = 600;
 
 const vertices = [_]f32{
-    -0.5, -0.5, -0.5, 0.0, 0.0,
-    0.5,  -0.5, -0.5, 1.0, 0.0,
-    0.5,  0.5,  -0.5, 1.0, 1.0,
-    0.5,  0.5,  -0.5, 1.0, 1.0,
-    -0.5, 0.5,  -0.5, 0.0, 1.0,
-    -0.5, -0.5, -0.5, 0.0, 0.0,
+    -0.5, -0.5, -0.5,
+    0.5,  -0.5, -0.5,
+    0.5,  0.5,  -0.5,
+    0.5,  0.5,  -0.5,
+    -0.5, 0.5,  -0.5,
+    -0.5, -0.5, -0.5,
 
-    -0.5, -0.5, 0.5,  0.0, 0.0,
-    0.5,  -0.5, 0.5,  1.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 1.0,
-    0.5,  0.5,  0.5,  1.0, 1.0,
-    -0.5, 0.5,  0.5,  0.0, 1.0,
-    -0.5, -0.5, 0.5,  0.0, 0.0,
+    -0.5, -0.5, 0.5,
+    0.5,  -0.5, 0.5,
+    0.5,  0.5,  0.5,
+    0.5,  0.5,  0.5,
+    -0.5, 0.5,  0.5,
+    -0.5, -0.5, 0.5,
 
-    -0.5, 0.5,  0.5,  1.0, 0.0,
-    -0.5, 0.5,  -0.5, 1.0, 1.0,
-    -0.5, -0.5, -0.5, 0.0, 1.0,
-    -0.5, -0.5, -0.5, 0.0, 1.0,
-    -0.5, -0.5, 0.5,  0.0, 0.0,
-    -0.5, 0.5,  0.5,  1.0, 0.0,
+    -0.5, 0.5,  0.5,
+    -0.5, 0.5,  -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5,  0.5,
 
-    0.5,  0.5,  0.5,  1.0, 0.0,
-    0.5,  0.5,  -0.5, 1.0, 1.0,
-    0.5,  -0.5, -0.5, 0.0, 1.0,
-    0.5,  -0.5, -0.5, 0.0, 1.0,
-    0.5,  -0.5, 0.5,  0.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
+    0.5,  0.5,  0.5,
+    0.5,  0.5,  -0.5,
+    0.5,  -0.5, -0.5,
+    0.5,  -0.5, -0.5,
+    0.5,  -0.5, 0.5,
+    0.5,  0.5,  0.5,
 
-    -0.5, -0.5, -0.5, 0.0, 1.0,
-    0.5,  -0.5, -0.5, 1.0, 1.0,
-    0.5,  -0.5, 0.5,  1.0, 0.0,
-    0.5,  -0.5, 0.5,  1.0, 0.0,
-    -0.5, -0.5, 0.5,  0.0, 0.0,
-    -0.5, -0.5, -0.5, 0.0, 1.0,
+    -0.5, -0.5, -0.5,
+    0.5,  -0.5, -0.5,
+    0.5,  -0.5, 0.5,
+    0.5,  -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
 
-    -0.5, 0.5,  -0.5, 0.0, 1.0,
-    0.5,  0.5,  -0.5, 1.0, 1.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5, 0.5,  0.5,  0.0, 0.0,
-    -0.5, 0.5,  -0.5, 0.0, 1.0,
+    -0.5, 0.5,  -0.5,
+    0.5,  0.5,  -0.5,
+    0.5,  0.5,  0.5,
+    0.5,  0.5,  0.5,
+    -0.5, 0.5,  0.5,
+    -0.5, 0.5,  -0.5,
 };
 
+const light_position = Vec3.new(1.2, 1.0, 5.0);
 const cube_positions = [_]Vec3{
     Vec3.new(0.0, 0.0, 0.0),
     Vec3.new(2.0, 5.0, -15.0),
@@ -72,8 +72,9 @@ var camera = Camera.init(Vec3.new(0.0, 0.0, 3.0), Vec3.up(), -90.0, 0.0);
 var last_x: f64 = 400.0;
 var last_y: f64 = 300.0;
 
-const vertex_shader = @embedFile("shaders/shader.vert");
-const fragment_shader = @embedFile("shaders/shader.frag");
+const vs = @embedFile("shaders/shader.vert");
+const obj_fs = @embedFile("shaders/shader.frag");
+const light_fs = @embedFile("shaders/light_shader.frag");
 
 pub fn main() anyerror!void {
     _ = c.glfwInit();
@@ -83,7 +84,7 @@ pub fn main() anyerror!void {
 
     const window = c.glfwCreateWindow(window_width, window_height, "Learn OpenGL", null, null) orelse {
         c.glfwTerminate();
-        panic("Failed to create GLFW window", .{});
+        std.debug.panic("Failed to create GLFW window", .{});
     };
     defer c.glfwTerminate();
     c.glfwMakeContextCurrent(window);
@@ -95,56 +96,29 @@ pub fn main() anyerror!void {
     _ = c.glfwSetCursorPosCallback(window, mouseCallback);
     _ = c.glfwSetScrollCallback(window, scrollCallback);
 
-    var vbo: c_uint = undefined;
     var vao: c_uint = undefined;
-    c.glGenBuffers(1, &vbo);
+    var light_vao: c_uint = undefined;
     c.glGenVertexArrays(1, &vao);
+    c.glGenVertexArrays(1, &light_vao);
 
-    c.glBindVertexArray(vao);
+    var vbo: c_uint = undefined;
+    c.glGenBuffers(1, &vbo);
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
     c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, c.GL_STATIC_DRAW);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 5 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+
+    c.glBindVertexArray(vao);
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
-    c.glVertexAttribPointer(1, 2, c.GL_FLOAT, c.GL_FALSE, 5 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
-    c.glEnableVertexAttribArray(1);
+    c.glBindVertexArray(light_vao);
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glEnableVertexAttribArray(0);
 
-    const shader = ShaderProgram.fromSource(vertex_shader, fragment_shader);
+    const obj_shader = ShaderProgram.fromSource(vs, obj_fs);
+    const light_shader = ShaderProgram.fromSource(vs, light_fs);
 
-    const container = @embedFile("res/container.jpg");
-    const awesomeface = @embedFile("res/awesomeface.png");
-    var width: c_int = undefined;
-    var height: c_int = undefined;
-    var nr_channels: c_int = undefined;
-
-    c.stbi_set_flip_vertically_on_load(@boolToInt(true));
-
-    var texture1: c_uint = undefined;
-    c.glGenTextures(1, &texture1);
-    c.glBindTexture(c.GL_TEXTURE_2D, texture1);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
-    var data: ?*u8 = c.stbi_load_from_memory(container, container.len, &width, &height, &nr_channels, 0);
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
-    c.glGenerateMipmap(c.GL_TEXTURE_2D);
-    c.stbi_image_free(data);
-
-    var texture2: c_uint = undefined;
-    c.glGenTextures(1, &texture2);
-    c.glBindTexture(c.GL_TEXTURE_2D, texture2);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
-    data = c.stbi_load_from_memory(awesomeface, awesomeface.len, &width, &height, &nr_channels, 0);
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, data);
-    c.glGenerateMipmap(c.GL_TEXTURE_2D);
-    c.stbi_image_free(data);
-
-    shader.use();
-    shader.setValue("inTexture1", 0);
-    shader.setValue("inTexture2", 1);
+    obj_shader.use();
+    obj_shader.setValue("objectColor", Vec3.new(1.0, 0.5, 0.31));
+    obj_shader.setValue("lightColor", Vec3.one());
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
@@ -160,23 +134,26 @@ pub fn main() anyerror!void {
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
-        c.glActiveTexture(c.GL_TEXTURE0);
-        c.glBindTexture(c.GL_TEXTURE_2D, texture1);
-        c.glActiveTexture(c.GL_TEXTURE1);
-        c.glBindTexture(c.GL_TEXTURE_2D, texture2);
-
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
 
-        shader.use();
-        shader.setValue("view", view);
-        shader.setValue("projection", projection);
+        const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
+        light_shader.use();
+        light_shader.setValue("view", view);
+        light_shader.setValue("projection", projection);
+        light_shader.setValue("model", light_model);
+        c.glBindVertexArray(light_vao);
+        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+
+        obj_shader.use();
+        obj_shader.setValue("view", view);
+        obj_shader.setValue("projection", projection);
         c.glBindVertexArray(vao);
         for (cube_positions) |pos, index| {
             const model = Mat4.fromTranslate(pos)
                 .rotate(@intToFloat(f32, index) * 20.0, Vec3.new(0.5, 1.0, 0.0));
 
-            shader.setValue("model", model);
+            obj_shader.setValue("model", model);
             c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
         }
 

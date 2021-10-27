@@ -1,7 +1,9 @@
 const std = @import("std");
 const c = @import("c.zig");
-const zalgebra = @import("zalgebra");
+const za = @import("zalgebra");
 const panic = std.debug.panic;
+const Vec3 = za.Vec3;
+const Mat4 = za.Mat4;
 
 id: c_uint,
 
@@ -81,11 +83,14 @@ pub fn setValue(self: Self, name: [*]const u8, value: anytype) void {
         },
         .Struct => {
             switch (@TypeOf(value)) {
-                zalgebra.Mat4 => {
+                Mat4 => {
                     c.glUniformMatrix4fv(c.glGetUniformLocation(self.id, name), 1, c.GL_FALSE, value.getData());
                 },
+                Vec3 => {
+                    c.glUniform3f(c.glGetUniformLocation(self.id, name), value.x, value.y, value.z);
+                },
                 else => {
-                    panic("adadadaNot implemented for type: {}", .{@TypeOf(value)});
+                    panic("Not implemented for type: {}", .{@TypeOf(value)});
                 },
             }
         },
