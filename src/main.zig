@@ -11,50 +11,50 @@ const window_width = 800;
 const window_height = 600;
 
 const vertices = [_]f32{
-    -0.5, -0.5, -0.5,
-    0.5,  -0.5, -0.5,
-    0.5,  0.5,  -0.5,
-    0.5,  0.5,  -0.5,
-    -0.5, 0.5,  -0.5,
-    -0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0,
+    0.5,  -0.5, -0.5, 0.0,  0.0,  -1.0,
+    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0,
+    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0,
+    -0.5, 0.5,  -0.5, 0.0,  0.0,  -1.0,
+    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0,
 
-    -0.5, -0.5, 0.5,
-    0.5,  -0.5, 0.5,
-    0.5,  0.5,  0.5,
-    0.5,  0.5,  0.5,
-    -0.5, 0.5,  0.5,
-    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,
+    0.5,  -0.5, 0.5,  0.0,  0.0,  1.0,
+    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,
+    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,
+    -0.5, 0.5,  0.5,  0.0,  0.0,  1.0,
+    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,
 
-    -0.5, 0.5,  0.5,
-    -0.5, 0.5,  -0.5,
-    -0.5, -0.5, -0.5,
-    -0.5, -0.5, -0.5,
-    -0.5, -0.5, 0.5,
-    -0.5, 0.5,  0.5,
+    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,
+    -0.5, 0.5,  -0.5, -1.0, 0.0,  0.0,
+    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,
+    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,
+    -0.5, -0.5, 0.5,  -1.0, 0.0,  0.0,
+    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,
 
-    0.5,  0.5,  0.5,
-    0.5,  0.5,  -0.5,
-    0.5,  -0.5, -0.5,
-    0.5,  -0.5, -0.5,
-    0.5,  -0.5, 0.5,
-    0.5,  0.5,  0.5,
+    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+    0.5,  0.5,  -0.5, 1.0,  0.0,  0.0,
+    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,
+    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,
+    0.5,  -0.5, 0.5,  1.0,  0.0,  0.0,
+    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
 
-    -0.5, -0.5, -0.5,
-    0.5,  -0.5, -0.5,
-    0.5,  -0.5, 0.5,
-    0.5,  -0.5, 0.5,
-    -0.5, -0.5, 0.5,
-    -0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,
+    0.5,  -0.5, -0.5, 0.0,  -1.0, 0.0,
+    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,
+    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,
+    -0.5, -0.5, 0.5,  0.0,  -1.0, 0.0,
+    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,
 
-    -0.5, 0.5,  -0.5,
-    0.5,  0.5,  -0.5,
-    0.5,  0.5,  0.5,
-    0.5,  0.5,  0.5,
-    -0.5, 0.5,  0.5,
-    -0.5, 0.5,  -0.5,
+    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,
+    0.5,  0.5,  -0.5, 0.0,  1.0,  0.0,
+    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+    -0.5, 0.5,  0.5,  0.0,  1.0,  0.0,
+    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,
 };
 
-const light_position = Vec3.new(1.2, 1.0, 5.0);
+var light_position = Vec3.new(1.2, 1.0, 5.0);
 const cube_positions = [_]Vec3{
     Vec3.new(0.0, 0.0, 0.0),
     Vec3.new(2.0, 5.0, -15.0),
@@ -107,18 +107,16 @@ pub fn main() anyerror!void {
     c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, c.GL_STATIC_DRAW);
 
     c.glBindVertexArray(vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glEnableVertexAttribArray(1);
     c.glBindVertexArray(light_vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
 
     const obj_shader = ShaderProgram.fromSource(vs, obj_fs);
     const light_shader = ShaderProgram.fromSource(vs, light_fs);
-
-    obj_shader.use();
-    obj_shader.setValue("objectColor", Vec3.new(1.0, 0.5, 0.31));
-    obj_shader.setValue("lightColor", Vec3.one());
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
@@ -137,6 +135,8 @@ pub fn main() anyerror!void {
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
 
+        light_position.x = 1.0 + std.math.sin(current_frame_time) * 2.0;
+        light_position.y = std.math.sin(current_frame_time / 2.0);
         const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
         light_shader.use();
         light_shader.setValue("view", view);
@@ -146,16 +146,16 @@ pub fn main() anyerror!void {
         c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
 
         obj_shader.use();
+        obj_shader.setValue("lightPosition", light_position);
+        obj_shader.setValue("objectColor", Vec3.new(1.0, 0.5, 0.31));
+        obj_shader.setValue("lightColor", Vec3.one());
+        obj_shader.setValue("viewPosition", camera.position);
         obj_shader.setValue("view", view);
         obj_shader.setValue("projection", projection);
         c.glBindVertexArray(vao);
-        for (cube_positions) |pos, index| {
-            const model = Mat4.fromTranslate(pos)
-                .rotate(@intToFloat(f32, index) * 20.0, Vec3.new(0.5, 1.0, 0.0));
-
-            obj_shader.setValue("model", model);
-            c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
-        }
+        const model = Mat4.fromTranslate(cube_positions[0]);
+        obj_shader.setValue("model", model);
+        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
 
         c.glfwSwapBuffers(window);
         c.glfwPollEvents();
