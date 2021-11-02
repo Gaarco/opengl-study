@@ -54,7 +54,7 @@ const vertices = [_]f32{
     -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,
 };
 
-var light_position = Vec3.new(1.2, 1.0, 5.0);
+var light_position = Vec3.new(0.0, 0.0, 5.0);
 const cube_positions = [_]Vec3{
     Vec3.new(0.0, 0.0, 0.0),
     Vec3.new(2.0, 5.0, -15.0),
@@ -72,9 +72,10 @@ var camera = Camera.init(Vec3.new(0.0, 0.0, 3.0), Vec3.up(), -90.0, 0.0);
 var last_x: f64 = 400.0;
 var last_y: f64 = 300.0;
 
-const vs = @embedFile("shaders/shader.vert");
-const obj_fs = @embedFile("shaders/shader.frag");
-const light_fs = @embedFile("shaders/light_shader.frag");
+const obj_vs = @embedFile("shaders/material.vert");
+const obj_fs = @embedFile("shaders/material.frag");
+const light_vs = @embedFile("shaders/light_cube.vert");
+const light_fs = @embedFile("shaders/light_cube.frag");
 
 pub fn main() anyerror!void {
     _ = c.glfwInit();
@@ -109,14 +110,14 @@ pub fn main() anyerror!void {
     c.glBindVertexArray(vao);
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
-    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(1);
     c.glBindVertexArray(light_vao);
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
 
-    const obj_shader = ShaderProgram.fromSource(vs, obj_fs);
-    const light_shader = ShaderProgram.fromSource(vs, light_fs);
+    const obj_shader = ShaderProgram.fromSource(obj_vs, obj_fs);
+    const light_shader = ShaderProgram.fromSource(light_vs, light_fs);
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
@@ -134,27 +135,35 @@ pub fn main() anyerror!void {
 
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
-
-        light_position.x = 1.0 + std.math.sin(current_frame_time) * 2.0;
-        light_position.y = std.math.sin(current_frame_time / 2.0);
+        const cube_model = Mat4.fromTranslate(cube_positions[0]);
         const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
-        light_shader.use();
-        light_shader.setValue("view", view);
-        light_shader.setValue("projection", projection);
-        light_shader.setValue("model", light_model);
-        c.glBindVertexArray(light_vao);
-        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
 
         obj_shader.use();
-        obj_shader.setValue("lightPosition", light_position);
-        obj_shader.setValue("objectColor", Vec3.new(1.0, 0.5, 0.31));
-        obj_shader.setValue("lightColor", Vec3.one());
+        obj_shader.setValue("light.position", light_position);
         obj_shader.setValue("viewPosition", camera.position);
+
+        obj_shader.setValue("light.ambient", Vec3.new(0.2, 0.2, 0.2));
+        obj_shader.setValue("light.diffuse", Vec3.new(0.5, 0.5, 0.5));
+        obj_shader.setValue("light.specular", Vec3.new(1.0, 1.0, 1.0));
+
+        obj_shader.setValue("material.ambient", Vec3.new(1.0, 0.5, 0.31));
+        obj_shader.setValue("material.diffuse", Vec3.new(1.0, 0.5, 0.31));
+        obj_shader.setValue("material.specular", Vec3.new(0.5, 0.5, 0.5));
+        obj_shader.setValue("material.shininess", 32.0);
+
+        obj_shader.setValue("model", cube_model);
         obj_shader.setValue("view", view);
         obj_shader.setValue("projection", projection);
+
         c.glBindVertexArray(vao);
-        const model = Mat4.fromTranslate(cube_positions[0]);
-        obj_shader.setValue("model", model);
+        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+
+        light_shader.use();
+        light_shader.setValue("model", light_model);
+        light_shader.setValue("view", view);
+        light_shader.setValue("projection", projection);
+
+        c.glBindVertexArray(light_vao);
         c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
 
         c.glfwSwapBuffers(window);
