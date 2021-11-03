@@ -11,47 +11,47 @@ const window_width = 800;
 const window_height = 600;
 
 const vertices = [_]f32{
-    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0,
-    0.5,  -0.5, -0.5, 0.0,  0.0,  -1.0,
-    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0,
-    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0,
-    -0.5, 0.5,  -0.5, 0.0,  0.0,  -1.0,
-    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0,
+    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0, 0.0, 0.0,
+    0.5,  -0.5, -0.5, 0.0,  0.0,  -1.0, 1.0, 0.0,
+    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0, 1.0, 1.0,
+    0.5,  0.5,  -0.5, 0.0,  0.0,  -1.0, 1.0, 1.0,
+    -0.5, 0.5,  -0.5, 0.0,  0.0,  -1.0, 0.0, 1.0,
+    -0.5, -0.5, -0.5, 0.0,  0.0,  -1.0, 0.0, 0.0,
 
-    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,
-    0.5,  -0.5, 0.5,  0.0,  0.0,  1.0,
-    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,
-    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,
-    -0.5, 0.5,  0.5,  0.0,  0.0,  1.0,
-    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,
+    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,  0.0, 0.0,
+    0.5,  -0.5, 0.5,  0.0,  0.0,  1.0,  1.0, 0.0,
+    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,  1.0, 1.0,
+    0.5,  0.5,  0.5,  0.0,  0.0,  1.0,  1.0, 1.0,
+    -0.5, 0.5,  0.5,  0.0,  0.0,  1.0,  0.0, 1.0,
+    -0.5, -0.5, 0.5,  0.0,  0.0,  1.0,  0.0, 0.0,
 
-    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,
-    -0.5, 0.5,  -0.5, -1.0, 0.0,  0.0,
-    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,
-    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,
-    -0.5, -0.5, 0.5,  -1.0, 0.0,  0.0,
-    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,
+    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,  1.0, 0.0,
+    -0.5, 0.5,  -0.5, -1.0, 0.0,  0.0,  1.0, 1.0,
+    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,  0.0, 1.0,
+    -0.5, -0.5, -0.5, -1.0, 0.0,  0.0,  0.0, 1.0,
+    -0.5, -0.5, 0.5,  -1.0, 0.0,  0.0,  0.0, 0.0,
+    -0.5, 0.5,  0.5,  -1.0, 0.0,  0.0,  1.0, 0.0,
 
-    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
-    0.5,  0.5,  -0.5, 1.0,  0.0,  0.0,
-    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,
-    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,
-    0.5,  -0.5, 0.5,  1.0,  0.0,  0.0,
-    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,  1.0, 0.0,
+    0.5,  0.5,  -0.5, 1.0,  0.0,  0.0,  1.0, 1.0,
+    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,  0.0, 1.0,
+    0.5,  -0.5, -0.5, 1.0,  0.0,  0.0,  0.0, 1.0,
+    0.5,  -0.5, 0.5,  1.0,  0.0,  0.0,  0.0, 0.0,
+    0.5,  0.5,  0.5,  1.0,  0.0,  0.0,  1.0, 0.0,
 
-    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,
-    0.5,  -0.5, -0.5, 0.0,  -1.0, 0.0,
-    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,
-    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,
-    -0.5, -0.5, 0.5,  0.0,  -1.0, 0.0,
-    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,
+    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,  0.0, 1.0,
+    0.5,  -0.5, -0.5, 0.0,  -1.0, 0.0,  1.0, 1.0,
+    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,  1.0, 0.0,
+    0.5,  -0.5, 0.5,  0.0,  -1.0, 0.0,  1.0, 0.0,
+    -0.5, -0.5, 0.5,  0.0,  -1.0, 0.0,  0.0, 0.0,
+    -0.5, -0.5, -0.5, 0.0,  -1.0, 0.0,  0.0, 1.0,
 
-    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,
-    0.5,  0.5,  -0.5, 0.0,  1.0,  0.0,
-    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
-    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
-    -0.5, 0.5,  0.5,  0.0,  1.0,  0.0,
-    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,
+    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,  0.0, 1.0,
+    0.5,  0.5,  -0.5, 0.0,  1.0,  0.0,  1.0, 1.0,
+    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,  1.0, 0.0,
+    0.5,  0.5,  0.5,  0.0,  1.0,  0.0,  1.0, 0.0,
+    -0.5, 0.5,  0.5,  0.0,  1.0,  0.0,  0.0, 0.0,
+    -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,  0.0, 1.0,
 };
 
 var light_position = Vec3.new(0.0, 0.0, 5.0);
@@ -71,6 +71,9 @@ const cube_positions = [_]Vec3{
 var camera = Camera.init(Vec3.new(0.0, 0.0, 3.0), Vec3.up(), -90.0, 0.0);
 var last_x: f64 = 400.0;
 var last_y: f64 = 300.0;
+
+const diffuse_map_raw = @embedFile("res/container2.png");
+const specular_map_raw = @embedFile("res/container2_specular.png");
 
 const obj_vs = @embedFile("shaders/material.vert");
 const obj_fs = @embedFile("shaders/material.frag");
@@ -108,13 +111,49 @@ pub fn main() anyerror!void {
     c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, c.GL_STATIC_DRAW);
 
     c.glBindVertexArray(vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
-    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
+    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
     c.glEnableVertexAttribArray(1);
+    c.glVertexAttribPointer(2, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 6 * @sizeOf(f32)));
+    c.glEnableVertexAttribArray(2);
     c.glBindVertexArray(light_vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 6 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
     c.glEnableVertexAttribArray(0);
+
+    var width: c_int = undefined;
+    var height: c_int = undefined;
+    var nr_channels: c_int = undefined;
+
+    var diffuse_map: c_uint = undefined;
+    c.glGenTextures(1, &diffuse_map);
+    c.glBindTexture(c.GL_TEXTURE_2D, diffuse_map);
+
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR_MIPMAP_LINEAR);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+
+    var diffuse_data: ?*u8 = c.stbi_load_from_memory(diffuse_map_raw, diffuse_map_raw.len, &width, &height, &nr_channels, 0);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGBA, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, diffuse_data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+
+    c.stbi_image_free(diffuse_data);
+
+    var specular_map: c_uint = undefined;
+    c.glGenTextures(1, &specular_map);
+    c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
+
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+
+    var specular_data: ?*u8 = c.stbi_load_from_memory(specular_map_raw, diffuse_map_raw.len, &width, &height, &nr_channels, 0);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGBA, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, specular_data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+
+    c.stbi_image_free(specular_data);
 
     const obj_shader = ShaderProgram.fromSource(obj_vs, obj_fs);
     const light_shader = ShaderProgram.fromSource(light_vs, light_fs);
@@ -138,6 +177,11 @@ pub fn main() anyerror!void {
         const cube_model = Mat4.fromTranslate(cube_positions[0]);
         const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
 
+        c.glActiveTexture(c.GL_TEXTURE0);
+        c.glBindTexture(c.GL_TEXTURE_2D, diffuse_map);
+        c.glActiveTexture(c.GL_TEXTURE1);
+        c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
+
         obj_shader.use();
         obj_shader.setValue("light.position", light_position);
         obj_shader.setValue("viewPosition", camera.position);
@@ -146,9 +190,8 @@ pub fn main() anyerror!void {
         obj_shader.setValue("light.diffuse", Vec3.new(0.5, 0.5, 0.5));
         obj_shader.setValue("light.specular", Vec3.new(1.0, 1.0, 1.0));
 
-        obj_shader.setValue("material.ambient", Vec3.new(1.0, 0.5, 0.31));
-        obj_shader.setValue("material.diffuse", Vec3.new(1.0, 0.5, 0.31));
-        obj_shader.setValue("material.specular", Vec3.new(0.5, 0.5, 0.5));
+        obj_shader.setValue("material.diffuse", 0);
+        obj_shader.setValue("material.specular", 1);
         obj_shader.setValue("material.shininess", 32.0);
 
         obj_shader.setValue("model", cube_model);
