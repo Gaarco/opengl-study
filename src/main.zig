@@ -174,7 +174,6 @@ pub fn main() anyerror!void {
 
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
-        const cube_model = Mat4.fromTranslate(cube_positions[0]);
         const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
 
         c.glActiveTexture(c.GL_TEXTURE0);
@@ -190,16 +189,23 @@ pub fn main() anyerror!void {
         obj_shader.setValue("light.diffuse", Vec3.new(0.5, 0.5, 0.5));
         obj_shader.setValue("light.specular", Vec3.new(1.0, 1.0, 1.0));
 
+        obj_shader.setValue("light.constant", 1.0);
+        obj_shader.setValue("light.linear", 0.09);
+        obj_shader.setValue("light.quadratic", 0.032);
+
         obj_shader.setValue("material.diffuse", 0);
         obj_shader.setValue("material.specular", 1);
         obj_shader.setValue("material.shininess", 32.0);
 
-        obj_shader.setValue("model", cube_model);
         obj_shader.setValue("view", view);
         obj_shader.setValue("projection", projection);
 
-        c.glBindVertexArray(vao);
-        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+        for (cube_positions) |p, i| {
+            const cube_model = Mat4.fromTranslate(p).rotate(20.0 * @intToFloat(f32, i), Vec3.new(1.0, 0.3, 0.5));
+            obj_shader.setValue("model", cube_model);
+            c.glBindVertexArray(vao);
+            c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+        }
 
         light_shader.use();
         light_shader.setValue("model", light_model);
