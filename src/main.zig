@@ -77,8 +77,6 @@ const specular_map_raw = @embedFile("res/container2_specular.png");
 
 const obj_vs = @embedFile("shaders/material.vert");
 const obj_fs = @embedFile("shaders/material.frag");
-const light_vs = @embedFile("shaders/light_cube.vert");
-const light_fs = @embedFile("shaders/light_cube.frag");
 
 pub fn main() anyerror!void {
     _ = c.glfwInit();
@@ -156,7 +154,6 @@ pub fn main() anyerror!void {
     c.stbi_image_free(specular_data);
 
     const obj_shader = ShaderProgram.fromSource(obj_vs, obj_fs);
-    const light_shader = ShaderProgram.fromSource(light_vs, light_fs);
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
@@ -174,7 +171,6 @@ pub fn main() anyerror!void {
 
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
-        const light_model = Mat4.fromTranslate(light_position).scale(Vec3.set(0.2));
 
         c.glActiveTexture(c.GL_TEXTURE0);
         c.glBindTexture(c.GL_TEXTURE_2D, diffuse_map);
@@ -182,11 +178,13 @@ pub fn main() anyerror!void {
         c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
 
         obj_shader.use();
-        obj_shader.setValue("light.position", light_position);
+        obj_shader.setValue("light.position", camera.position);
+        obj_shader.setValue("light.direction", camera.front);
+        obj_shader.setValue("light.cutOff", std.math.cos(za.toRadians(@as(f32, 12.5))));
         obj_shader.setValue("viewPosition", camera.position);
 
-        obj_shader.setValue("light.ambient", Vec3.new(0.2, 0.2, 0.2));
-        obj_shader.setValue("light.diffuse", Vec3.new(0.5, 0.5, 0.5));
+        obj_shader.setValue("light.ambient", Vec3.new(0.1, 0.1, 0.1));
+        obj_shader.setValue("light.diffuse", Vec3.new(0.8, 0.8, 0.8));
         obj_shader.setValue("light.specular", Vec3.new(1.0, 1.0, 1.0));
 
         obj_shader.setValue("light.constant", 1.0);
@@ -206,14 +204,6 @@ pub fn main() anyerror!void {
             c.glBindVertexArray(vao);
             c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
         }
-
-        light_shader.use();
-        light_shader.setValue("model", light_model);
-        light_shader.setValue("view", view);
-        light_shader.setValue("projection", projection);
-
-        c.glBindVertexArray(light_vao);
-        c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
 
         c.glfwSwapBuffers(window);
         c.glfwPollEvents();
