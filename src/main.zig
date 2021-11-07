@@ -54,7 +54,12 @@ const vertices = [_]f32{
     -0.5, 0.5,  -0.5, 0.0,  1.0,  0.0,  0.0, 1.0,
 };
 
-var light_position = Vec3.new(0.0, 0.0, 5.0);
+const point_light_positions = [_]Vec3{
+    Vec3.new(0.7, 0.2, 2.0),
+    Vec3.new(2.3, -3.3, -4.0),
+    Vec3.new(-4.0, 2.0, -12.0),
+    Vec3.new(0.0, 0.0, -3.0),
+};
 const cube_positions = [_]Vec3{
     Vec3.new(0.0, 0.0, 0.0),
     Vec3.new(2.0, 5.0, -15.0),
@@ -77,6 +82,8 @@ const specular_map_raw = @embedFile("res/container2_specular.png");
 
 const obj_vs = @embedFile("shaders/material.vert");
 const obj_fs = @embedFile("shaders/material.frag");
+const light_vs = @embedFile("shaders/light_cube.vert");
+const light_fs = @embedFile("shaders/light_cube.frag");
 
 pub fn main() anyerror!void {
     _ = c.glfwInit();
@@ -154,9 +161,14 @@ pub fn main() anyerror!void {
     c.stbi_image_free(specular_data);
 
     const obj_shader = ShaderProgram.fromSource(obj_vs, obj_fs);
+    const light_shader = ShaderProgram.fromSource(light_vs, light_fs);
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
+
+    obj_shader.use();
+    obj_shader.setValue("material.diffuse", 0);
+    obj_shader.setValue("material.specular", 1);
 
     while (c.glfwWindowShouldClose(window) != 1) {
         const current_frame_time = @floatCast(f32, c.glfwGetTime());
@@ -178,29 +190,51 @@ pub fn main() anyerror!void {
         c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
 
         obj_shader.use();
-        obj_shader.setValue("light.position", camera.position);
-        obj_shader.setValue("light.direction", camera.front);
-        obj_shader.setValue("light.cutOff", std.math.cos(za.toRadians(@as(f32, 12.5))));
-        obj_shader.setValue("viewPosition", camera.position);
+        inline for (point_light_positions) |p, i| {
+            const index = comptime std.fmt.comptimePrint("{}", .{i});
+            obj_shader.setValue("pointLights[" ++ index ++ "].position", p);
+            obj_shader.setValue("pointLights[" ++ index ++ "].ambient", Vec3.set(0.05));
+            obj_shader.setValue("pointLights[" ++ index ++ "].diffuse", Vec3.set(0.8));
+            obj_shader.setValue("pointLights[" ++ index ++ "].specular", Vec3.one());
+            obj_shader.setValue("pointLights[" ++ index ++ "].constant", 1.0);
+            obj_shader.setValue("pointLights[" ++ index ++ "].linear", 0.09);
+            obj_shader.setValue("pointLights[" ++ index ++ "].quadratic", 0.032);
+        }
+        obj_shader.setValue("directionalLight.direction", Vec3.new(-0.2, -1.0, -0.3));
+        obj_shader.setValue("directionalLight.ambient", Vec3.set(0.05));
+        obj_shader.setValue("directionalLight.diffuse", Vec3.set(0.4));
+        obj_shader.setValue("directionalLight.specular", Vec3.set(0.5));
 
-        obj_shader.setValue("light.ambient", Vec3.new(0.1, 0.1, 0.1));
-        obj_shader.setValue("light.diffuse", Vec3.new(0.8, 0.8, 0.8));
-        obj_shader.setValue("light.specular", Vec3.new(1.0, 1.0, 1.0));
+        obj_shader.setValue("spotLight.position", camera.position);
+        obj_shader.setValue("spotLight.direction", camera.front);
+        obj_shader.setValue("spotLight.ambient", Vec3.zero());
+        obj_shader.setValue("spotLight.diffuse", Vec3.one());
+        obj_shader.setValue("spotLight.specular", Vec3.one());
+        obj_shader.setValue("spotLight.constant", 1.0);
+        obj_shader.setValue("spotLight.linear", 0.09);
+        obj_shader.setValue("spotLight.quadratic", 0.032);
+        obj_shader.setValue("spotLight.cutOff", std.math.cos(za.toRadians(@as(f32, 12.5))));
+        obj_shader.setValue("spotLight.outerCutOff", std.math.cos(za.toRadians(@as(f32, 15.0))));
 
-        obj_shader.setValue("light.constant", 1.0);
-        obj_shader.setValue("light.linear", 0.09);
-        obj_shader.setValue("light.quadratic", 0.032);
-
-        obj_shader.setValue("material.diffuse", 0);
-        obj_shader.setValue("material.specular", 1);
         obj_shader.setValue("material.shininess", 32.0);
 
+        obj_shader.setValue("viewPosition", camera.position);
         obj_shader.setValue("view", view);
         obj_shader.setValue("projection", projection);
 
         for (cube_positions) |p, i| {
-            const cube_model = Mat4.fromTranslate(p).rotate(20.0 * @intToFloat(f32, i), Vec3.new(1.0, 0.3, 0.5));
-            obj_shader.setValue("model", cube_model);
+            const model = Mat4.fromTranslate(p).rotate(20.0 * @intToFloat(f32, i), Vec3.new(1.0, 0.3, 0.5));
+            obj_shader.setValue("model", model);
+            c.glBindVertexArray(vao);
+            c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+        }
+
+        light_shader.use();
+        light_shader.setValue("view", view);
+        light_shader.setValue("projection", projection);
+        for (point_light_positions) |p| {
+            const model = Mat4.fromScale(Vec3.set(0.2)).translate(p);
+            light_shader.setValue("model", model);
             c.glBindVertexArray(vao);
             c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
         }
