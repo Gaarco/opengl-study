@@ -9,19 +9,20 @@ id: c_uint,
 
 const Self = @This();
 
-// TODO doesn't work, shader compilation fails
-pub fn fromPath(allocator: *std.mem.Allocator, vertex_path: []const u8, fragment_path: []const u8) !Self {
+pub fn fromPath(allocator: *std.mem.Allocator, vertex_path: []const u8, fragment_path: []const u8, max_size: usize) !Self {
     const vertex_file = try std.fs.cwd().openFile(vertex_path, .{ .read = true });
     defer vertex_file.close();
     var vert_buf_reader = std.io.bufferedReader(vertex_file.reader());
     var vert_in_stream = vert_buf_reader.reader();
-    const vertex_shader = vert_in_stream.readAllAlloc(allocator, 1024) catch unreachable;
+    var vertex_shader = try vert_in_stream.readAllAlloc(allocator, max_size);
+    vertex_shader = try std.mem.Allocator.dupeZ(allocator, u8, vertex_shader);
 
     const fragment_file = try std.fs.cwd().openFile(fragment_path, .{ .read = true });
     defer fragment_file.close();
     var frag_buf_reader = std.io.bufferedReader(fragment_file.reader());
     var frag_in_stream = frag_buf_reader.reader();
-    const fragment_shader = frag_in_stream.readAllAlloc(allocator, 1024) catch unreachable;
+    var fragment_shader = try frag_in_stream.readAllAlloc(allocator, max_size);
+    fragment_shader = try std.mem.Allocator.dupeZ(allocator, u8, fragment_shader);
 
     return fromSource(vertex_shader, fragment_shader);
 }
@@ -70,24 +71,24 @@ pub fn use(self: Self) void {
     c.glUseProgram(self.id);
 }
 
-pub fn setValue(self: Self, name: [*]const u8, value: anytype) void {
+pub fn setValue(self: Self, name: []const u8, value: anytype) void {
     switch (@typeInfo(@TypeOf(value))) {
         .Int, .ComptimeInt => {
-            c.glUniform1i(c.glGetUniformLocation(self.id, name), value);
+            c.glUniform1i(c.glGetUniformLocation(self.id, name.ptr), value);
         },
         .Float, .ComptimeFloat => {
-            c.glUniform1f(c.glGetUniformLocation(self.id, name), value);
+            c.glUniform1f(c.glGetUniformLocation(self.id, name.ptr), value);
         },
         .Bool => {
-            c.glUniform1i(c.glGetUniformLocation(self.id, name), @boolToInt(value));
+            c.glUniform1i(c.glGetUniformLocation(self.id, name.ptr), @boolToInt(value));
         },
         .Struct => {
             switch (@TypeOf(value)) {
                 Mat4 => {
-                    c.glUniformMatrix4fv(c.glGetUniformLocation(self.id, name), 1, c.GL_FALSE, value.getData());
+                    c.glUniformMatrix4fv(c.glGetUniformLocation(self.id, name.ptr), 1, c.GL_FALSE, value.getData());
                 },
                 Vec3 => {
-                    c.glUniform3f(c.glGetUniformLocation(self.id, name), value.x, value.y, value.z);
+                    c.glUniform3f(c.glGetUniformLocation(self.id, name.ptr), value.x, value.y, value.z);
                 },
                 else => {
                     panic("Not implemented for type: {}", .{@TypeOf(value)});

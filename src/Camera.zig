@@ -51,7 +51,7 @@ pub fn default() Self {
     };
 }
 
-pub fn getViewMatrix(self: *Self) Mat4 {
+pub fn getViewMatrix(self: Self) Mat4 {
     return Mat4.lookAt(self.position, self.position.add(self.front), self.up);
 }
 

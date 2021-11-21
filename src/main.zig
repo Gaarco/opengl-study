@@ -1,7 +1,7 @@
 const std = @import("std");
 const za = @import("zalgebra");
 const c = @import("c.zig");
-const ShaderProgram = @import("ShaderProgram.zig");
+const Shader = @import("Shader.zig");
 const Camera = @import("Camera.zig");
 const Direction = @import("Camera.zig").Direction;
 const Vec3 = za.Vec3;
@@ -160,8 +160,8 @@ pub fn main() anyerror!void {
 
     c.stbi_image_free(specular_data);
 
-    const obj_shader = ShaderProgram.fromSource(obj_vs, obj_fs);
-    const light_shader = ShaderProgram.fromSource(light_vs, light_fs);
+    const obj_shader = Shader.fromSource(obj_vs, obj_fs);
+    const light_shader = Shader.fromSource(light_vs, light_fs);
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;

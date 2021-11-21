@@ -19,11 +19,18 @@ pub fn build(b: *std.build.Builder) void {
             @compileError("Platform not supported");
         },
     }
-    exe.linkSystemLibrary("epoxy");
-    exe.linkSystemLibrary("glfw3");
+
     exe.addCSourceFile("deps/stb/stb_image.c", &.{"-std=c99"});
     exe.addIncludeDir("deps/stb");
+
     exe.addPackagePath("zalgebra", "deps/zalgebra/src/main.zig");
+    exe.addPackagePath("gl33", "deps/zig-opengl/exports/gl_3v3.zig");
+
+    exe.linkSystemLibrary("epoxy");
+    exe.linkSystemLibrary("glfw3");
+    exe.linkSystemLibrary("assimp");
+    exe.linkSystemLibrary("c++");
+
     exe.linkLibC();
 
     exe.setTarget(target);
