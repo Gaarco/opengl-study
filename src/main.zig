@@ -99,7 +99,7 @@ pub fn main() anyerror!void {
     defer c.glfwTerminate();
     c.glfwMakeContextCurrent(window);
 
-    try gl.load({}, wrapper);
+    try gl.load({}, getProcAddress);
     gl.enable(gl.DEPTH_TEST);
     gl.viewport(0, 0, window_width, window_height);
     _ = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -286,7 +286,7 @@ fn processInput(window: ?*c.GLFWwindow, delta_time: f32) void {
     }
 }
 
-fn wrapper(ctx: void, entry_point: [:0]const u8) ?*c_void {
+fn getProcAddress(ctx: void, entry_point: [:0]const u8) ?*const c_void {
     _ = ctx;
-    return c.glfwGetProcAddress(entry_point.ptr);
+    return c.glfwGetProcAddress(entry_point);
 }
