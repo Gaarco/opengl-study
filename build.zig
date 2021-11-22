@@ -20,8 +20,8 @@ pub fn build(b: *std.build.Builder) void {
         },
     }
 
-    exe.addCSourceFile("deps/stb/stb_image.c", &.{"-std=c99"});
-    exe.addIncludeDir("deps/stb");
+    exe.addCSourceFile("deps/stb_image.c", &.{"-std=c99"});
+    exe.addIncludeDir("deps/");
 
     exe.addPackagePath("zalgebra", "deps/zalgebra/src/main.zig");
     exe.addPackagePath("gl33", "deps/gl/gl_3v3.zig");
