@@ -26,7 +26,6 @@ pub fn build(b: *std.build.Builder) void {
     exe.addPackagePath("zalgebra", "deps/zalgebra/src/main.zig");
     exe.addPackagePath("gl33", "deps/zig-opengl/exports/gl_3v3.zig");
 
-    exe.linkSystemLibrary("epoxy");
     exe.linkSystemLibrary("glfw3");
     exe.linkSystemLibrary("assimp");
     exe.linkSystemLibrary("c++");

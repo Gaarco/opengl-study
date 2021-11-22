@@ -1,4 +1,5 @@
 const std = @import("std");
+const gl = @import("gl33");
 const za = @import("zalgebra");
 const c = @import("c.zig");
 const Shader = @import("Shader.zig");
@@ -98,8 +99,9 @@ pub fn main() anyerror!void {
     defer c.glfwTerminate();
     c.glfwMakeContextCurrent(window);
 
-    c.glEnable(c.GL_DEPTH_TEST);
-    c.glViewport(0, 0, window_width, window_height);
+    try gl.load({}, wrapper);
+    gl.enable(gl.DEPTH_TEST);
+    gl.viewport(0, 0, window_width, window_height);
     _ = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     c.glfwSetInputMode(window, c.GLFW_CURSOR, c.GLFW_CURSOR_DISABLED);
     _ = c.glfwSetCursorPosCallback(window, mouseCallback);
@@ -107,56 +109,56 @@ pub fn main() anyerror!void {
 
     var vao: c_uint = undefined;
     var light_vao: c_uint = undefined;
-    c.glGenVertexArrays(1, &vao);
-    c.glGenVertexArrays(1, &light_vao);
+    gl.genVertexArrays(1, &vao);
+    gl.genVertexArrays(1, &light_vao);
 
     var vbo: c_uint = undefined;
-    c.glGenBuffers(1, &vbo);
-    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, c.GL_STATIC_DRAW);
+    gl.genBuffers(1, &vbo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, gl.STATIC_DRAW);
 
-    c.glBindVertexArray(vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
-    c.glEnableVertexAttribArray(0);
-    c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
-    c.glEnableVertexAttribArray(1);
-    c.glVertexAttribPointer(2, 2, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 6 * @sizeOf(f32)));
-    c.glEnableVertexAttribArray(2);
-    c.glBindVertexArray(light_vao);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
-    c.glEnableVertexAttribArray(0);
+    gl.bindVertexArray(vao);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 6 * @sizeOf(f32)));
+    gl.enableVertexAttribArray(2);
+    gl.bindVertexArray(light_vao);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    gl.enableVertexAttribArray(0);
 
     var width: c_int = undefined;
     var height: c_int = undefined;
     var nr_channels: c_int = undefined;
 
     var diffuse_map: c_uint = undefined;
-    c.glGenTextures(1, &diffuse_map);
-    c.glBindTexture(c.GL_TEXTURE_2D, diffuse_map);
+    gl.genTextures(1, &diffuse_map);
+    gl.bindTexture(gl.TEXTURE_2D, diffuse_map);
 
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR_MIPMAP_LINEAR);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     var diffuse_data: ?*u8 = c.stbi_load_from_memory(diffuse_map_raw, diffuse_map_raw.len, &width, &height, &nr_channels, 0);
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGBA, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, diffuse_data);
-    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, diffuse_data);
+    gl.generateMipmap(gl.TEXTURE_2D);
 
     c.stbi_image_free(diffuse_data);
 
     var specular_map: c_uint = undefined;
-    c.glGenTextures(1, &specular_map);
-    c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
+    gl.genTextures(1, &specular_map);
+    gl.bindTexture(gl.TEXTURE_2D, specular_map);
 
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR_MIPMAP_LINEAR);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     var specular_data: ?*u8 = c.stbi_load_from_memory(specular_map_raw, diffuse_map_raw.len, &width, &height, &nr_channels, 0);
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGBA, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, specular_data);
-    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, specular_data);
+    gl.generateMipmap(gl.TEXTURE_2D);
 
     c.stbi_image_free(specular_data);
 
@@ -178,16 +180,16 @@ pub fn main() anyerror!void {
 
         processInput(window, delta_time);
 
-        c.glClearColor(0.2, 0.3, 0.3, 1.0);
-        c.glClear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+        gl.clearColor(0.2, 0.3, 0.3, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         const view = camera.getViewMatrix();
         const projection = Mat4.perspective(camera.fov, window_width / window_height, 0.1, 100.0);
 
-        c.glActiveTexture(c.GL_TEXTURE0);
-        c.glBindTexture(c.GL_TEXTURE_2D, diffuse_map);
-        c.glActiveTexture(c.GL_TEXTURE1);
-        c.glBindTexture(c.GL_TEXTURE_2D, specular_map);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, diffuse_map);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, specular_map);
 
         obj_shader.use();
         inline for (point_light_positions) |p, i| {
@@ -225,8 +227,8 @@ pub fn main() anyerror!void {
         for (cube_positions) |p, i| {
             const model = Mat4.fromTranslate(p).rotate(20.0 * @intToFloat(f32, i), Vec3.new(1.0, 0.3, 0.5));
             obj_shader.setValue("model", model);
-            c.glBindVertexArray(vao);
-            c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+            gl.bindVertexArray(vao);
+            gl.drawArrays(gl.TRIANGLES, 0, 36);
         }
 
         light_shader.use();
@@ -235,8 +237,8 @@ pub fn main() anyerror!void {
         for (point_light_positions) |p| {
             const model = Mat4.fromScale(Vec3.set(0.2)).translate(p);
             light_shader.setValue("model", model);
-            c.glBindVertexArray(vao);
-            c.glDrawArrays(c.GL_TRIANGLES, 0, 36);
+            gl.bindVertexArray(vao);
+            gl.drawArrays(gl.TRIANGLES, 0, 36);
         }
 
         c.glfwSwapBuffers(window);
@@ -246,7 +248,7 @@ pub fn main() anyerror!void {
 
 fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     _ = window;
-    c.glViewport(0, 0, width, height);
+    gl.viewport(0, 0, width, height);
 }
 
 fn mouseCallback(window: ?*c.GLFWwindow, pos_x: f64, pos_y: f64) callconv(.C) void {
@@ -282,4 +284,9 @@ fn processInput(window: ?*c.GLFWwindow, delta_time: f32) void {
     if (c.glfwGetKey(window, c.GLFW_KEY_D) == c.GLFW_PRESS) {
         camera.processKeyboard(Direction.right, delta_time);
     }
+}
+
+fn wrapper(ctx: void, entry_point: [:0]const u8) ?*c_void {
+    _ = ctx;
+    return c.glfwGetProcAddress(entry_point.ptr);
 }

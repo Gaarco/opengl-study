@@ -1,4 +1,5 @@
 const std = @import("std");
+const gl = @import("gl33");
 const c = @import("c.zig");
 const za = @import("zalgebra");
 const panic = std.debug.panic;
@@ -30,37 +31,37 @@ pub fn fromPath(allocator: *std.mem.Allocator, vertex_path: []const u8, fragment
 pub fn fromSource(vertex_shader: []const u8, fragment_shader: []const u8) Self {
     var success: c_int = undefined;
 
-    const vertex_id = c.glCreateShader(c.GL_VERTEX_SHADER);
-    defer c.glDeleteShader(vertex_id);
-    c.glShaderSource(vertex_id, 1, &[_][*]const u8{vertex_shader.ptr}, null);
-    c.glCompileShader(vertex_id);
-    c.glGetShaderiv(vertex_id, c.GL_COMPILE_STATUS, &success);
+    const vertex_id = gl.createShader(gl.VERTEX_SHADER);
+    defer gl.deleteShader(vertex_id);
+    gl.shaderSource(vertex_id, 1, &[_][*]const u8{vertex_shader.ptr}, null);
+    gl.compileShader(vertex_id);
+    gl.getShaderiv(vertex_id, gl.COMPILE_STATUS, &success);
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
-        c.glGetShaderInfoLog(vertex_id, info_log.len, null, &info_log);
+        gl.getShaderInfoLog(vertex_id, info_log.len, null, &info_log);
         panic("ERROR: Vertex shader compilation failed\n{s}", .{info_log});
     }
 
-    const fragment_id = c.glCreateShader(c.GL_FRAGMENT_SHADER);
-    defer c.glDeleteShader(fragment_id);
-    c.glShaderSource(fragment_id, 1, &[_][*]const u8{fragment_shader.ptr}, null);
-    c.glCompileShader(fragment_id);
-    c.glGetShaderiv(fragment_id, c.GL_COMPILE_STATUS, &success);
+    const fragment_id = gl.createShader(gl.FRAGMENT_SHADER);
+    defer gl.deleteShader(fragment_id);
+    gl.shaderSource(fragment_id, 1, &[_][*]const u8{fragment_shader.ptr}, null);
+    gl.compileShader(fragment_id);
+    gl.getShaderiv(fragment_id, gl.COMPILE_STATUS, &success);
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
-        c.glGetShaderInfoLog(fragment_id, info_log.len, null, &info_log);
+        gl.getShaderInfoLog(fragment_id, info_log.len, null, &info_log);
         panic("ERROR: Fragment shader compilation failed\n{s}", .{info_log});
     }
 
-    const id: c_uint = c.glCreateProgram();
-    c.glAttachShader(id, vertex_id);
-    c.glAttachShader(id, fragment_id);
-    c.glLinkProgram(id);
+    const id: c_uint = gl.createProgram();
+    gl.attachShader(id, vertex_id);
+    gl.attachShader(id, fragment_id);
+    gl.linkProgram(id);
 
-    c.glGetProgramiv(id, c.GL_LINK_STATUS, &success);
+    gl.getProgramiv(id, gl.LINK_STATUS, &success);
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
-        c.glGetProgramInfoLog(id, info_log.len, null, &info_log);
+        gl.getProgramInfoLog(id, info_log.len, null, &info_log);
         panic("ERROR: Shader linking failed\n{s}", .{info_log});
     }
 
@@ -68,27 +69,27 @@ pub fn fromSource(vertex_shader: []const u8, fragment_shader: []const u8) Self {
 }
 
 pub fn use(self: Self) void {
-    c.glUseProgram(self.id);
+    gl.useProgram(self.id);
 }
 
 pub fn setValue(self: Self, name: []const u8, value: anytype) void {
     switch (@typeInfo(@TypeOf(value))) {
         .Int, .ComptimeInt => {
-            c.glUniform1i(c.glGetUniformLocation(self.id, name.ptr), value);
+            gl.uniform1i(gl.getUniformLocation(self.id, name.ptr), value);
         },
         .Float, .ComptimeFloat => {
-            c.glUniform1f(c.glGetUniformLocation(self.id, name.ptr), value);
+            gl.uniform1f(gl.getUniformLocation(self.id, name.ptr), value);
         },
         .Bool => {
-            c.glUniform1i(c.glGetUniformLocation(self.id, name.ptr), @boolToInt(value));
+            gl.uniform1i(gl.getUniformLocation(self.id, name.ptr), @boolToInt(value));
         },
         .Struct => {
             switch (@TypeOf(value)) {
                 Mat4 => {
-                    c.glUniformMatrix4fv(c.glGetUniformLocation(self.id, name.ptr), 1, c.GL_FALSE, value.getData());
+                    gl.uniformMatrix4fv(gl.getUniformLocation(self.id, name.ptr), 1, gl.FALSE, value.getData());
                 },
                 Vec3 => {
-                    c.glUniform3f(c.glGetUniformLocation(self.id, name.ptr), value.x, value.y, value.z);
+                    gl.uniform3f(gl.getUniformLocation(self.id, name.ptr), value.x, value.y, value.z);
                 },
                 else => {
                     panic("Not implemented for type: {}", .{@TypeOf(value)});

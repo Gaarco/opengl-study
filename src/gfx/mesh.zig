@@ -1,4 +1,5 @@
 const std = @import("std");
+const gl = @import("gl33");
 const c = @import("c.zig");
 const Shader = @import("../Shader.zig");
 const Vertex = @import("vertex.zig").Vertex;
@@ -20,9 +21,9 @@ const Mesh = struct {
         const vbo: c_uint = undefined;
         const ebo: c_uint = undefined;
 
-        c.glGenVertexArrays(1, vao);
-        c.glGenBuffers(1, vbo);
-        c.glGenBuffers(1, ebo);
+        gl.genVertexArrays(1, vao);
+        gl.genBuffers(1, vbo);
+        gl.genBuffers(1, ebo);
 
         const mesh = Self{
             .vao = vao,
@@ -38,7 +39,7 @@ const Mesh = struct {
 
     pub fn draw(self: Self, shader: Shader) void {
         for (self.textures) |i, t| {
-            c.glActiveTexture(c.GL_TEXTURE0 + i);
+            gl.activeTexture(gl.TEXTURE0 + i);
             switch (t.@"type") {
                 .diffuse => {
                     diff_count += 1;
@@ -51,21 +52,21 @@ const Mesh = struct {
     }
 
     fn setupMesh(self: Self) void {
-        c.glBindVertexArray(self.vao);
-        c.glBindBuffer(c.GL_ARRAY_BUFFER, self.vbo);
+        gl.bindVertexArray(self.vao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, self.vbo);
 
-        c.glBufferData(c.GL_ARRAY_BUFFER, self.vertices.len * @sizeOf(Vertex), &self.vertices, c.GL_STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, self.vertices.len * @sizeOf(Vertex), &self.vertices, gl.STATIC_DRAW);
 
-        c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, self.ebo);
-        c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, self.indices.len * @sizeOf(u32), &self.indices, c.GL_STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.ebo);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, self.indices.len * @sizeOf(u32), &self.indices, gl.STATIC_DRAW);
 
-        c.glEnableVertexAttribArray(0);
-        c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, @sizeOf(Vertex), @intToPtr(?*c_void, 0));
-        c.glEnableVertexAttribArray(1);
-        c.glVertexAttribPointer(1, 3, c.GL_FLOAT, c.GL_FALSE, @sizeOf(Vertex), @offsetOf(Vertex, "normal"));
-        c.glEnableVertexAttribArray(2);
-        c.glVertexAttribPointer(2, 2, c.GL_FLOAT, c.GL_FALSE, @sizeOf(Vertex), @offsetOf(Vertex, "texture_coords"));
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @intToPtr(?*c_void, 0));
+        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @offsetOf(Vertex, "normal"));
+        gl.enableVertexAttribArray(2);
+        gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @offsetOf(Vertex, "texture_coords"));
 
-        c.glBindVertexArray(0);
+        gl.bindVertexArray(0);
     }
 };
