@@ -1,6 +1,3 @@
 [submodule "deps/zalgebra"]
 	path = deps/zalgebra
 	url = git@github.com:kooparse/zalgebra.git
-[submodule "deps/zig-opengl"]
-	path = deps/zig-opengl
-	url = git@github.com:MasterQ32/zig-opengl.git
