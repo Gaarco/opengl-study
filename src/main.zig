@@ -162,15 +162,15 @@ pub fn main() anyerror!void {
 
     c.stbi_image_free(specular_data);
 
-    const obj_shader = Shader.fromSource(obj_vs, obj_fs);
-    const light_shader = Shader.fromSource(light_vs, light_fs);
+    const obj_shader = Shader.fromMemory(obj_vs, obj_fs);
+    const light_shader = Shader.fromMemory(light_vs, light_fs);
 
     var delta_time: f32 = 0.0;
     var last_frame_time: f32 = 0.0;
 
     obj_shader.use();
-    obj_shader.setValue("material.diffuse", 0);
-    obj_shader.setValue("material.specular", 1);
+    gl.uniform1i(obj_shader.getUniformLocation("material.diffuse"), 0);
+    gl.uniform1i(obj_shader.getUniformLocation("material.specular"), 1);
 
     while (c.glfwWindowShouldClose(window) != 1) {
         const current_frame_time = @floatCast(f32, c.glfwGetTime());
@@ -192,51 +192,49 @@ pub fn main() anyerror!void {
         gl.bindTexture(gl.TEXTURE_2D, specular_map);
 
         obj_shader.use();
-        inline for (point_light_positions) |p, i| {
-            const index = comptime std.fmt.comptimePrint("{}", .{i});
-            obj_shader.setValue("pointLights[" ++ index ++ "].position", p);
-            obj_shader.setValue("pointLights[" ++ index ++ "].ambient", Vec3.set(0.05));
-            obj_shader.setValue("pointLights[" ++ index ++ "].diffuse", Vec3.set(0.8));
-            obj_shader.setValue("pointLights[" ++ index ++ "].specular", Vec3.one());
-            obj_shader.setValue("pointLights[" ++ index ++ "].constant", 1.0);
-            obj_shader.setValue("pointLights[" ++ index ++ "].linear", 0.09);
-            obj_shader.setValue("pointLights[" ++ index ++ "].quadratic", 0.032);
+        inline for (point_light_positions) |p, _i| {
+            const i = comptime std.fmt.comptimePrint("{}", .{_i});
+            gl.uniform3f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].position"), p.x, p.y, p.z);
+            gl.uniform3f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].ambient"), 0.05, 0.05, 0.05);
+            gl.uniform3f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].diffuse"), 0.8, 0.8, 0.8);
+            gl.uniform3f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].specular"), 1.0, 1.0, 1.0);
+            gl.uniform1f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].constant"), 1.0);
+            gl.uniform1f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].linear"), 0.09);
+            gl.uniform1f(obj_shader.getUniformLocation("pointLights[" ++ i ++ "].quadratic"), 0.032);
         }
-        obj_shader.setValue("directionalLight.direction", Vec3.new(-0.2, -1.0, -0.3));
-        obj_shader.setValue("directionalLight.ambient", Vec3.set(0.05));
-        obj_shader.setValue("directionalLight.diffuse", Vec3.set(0.4));
-        obj_shader.setValue("directionalLight.specular", Vec3.set(0.5));
+        gl.uniform3f(obj_shader.getUniformLocation("directionalLight.direction"), -0.2, -1.0, -0.3);
+        gl.uniform3f(obj_shader.getUniformLocation("directionalLight.ambient"), 0.05, 0.05, 0.05);
+        gl.uniform3f(obj_shader.getUniformLocation("directionalLight.diffuse"), 0.4, 0.4, 0.4);
+        gl.uniform3f(obj_shader.getUniformLocation("directionalLight.specular"), 0.5, 0.5, 0.5);
+        gl.uniform3f(obj_shader.getUniformLocation("spotLight.position"), camera.position.x, camera.position.y, camera.position.z);
+        gl.uniform3f(obj_shader.getUniformLocation("spotLight.direction"), camera.front.x, camera.front.y, camera.front.z);
+        gl.uniform3f(obj_shader.getUniformLocation("spotLight.ambient"), 0.0, 0.0, 0.0);
+        gl.uniform3f(obj_shader.getUniformLocation("spotLight.diffuse"), 1.0, 1.0, 1.0);
+        gl.uniform3f(obj_shader.getUniformLocation("spotLight.specular"), 1.0, 1.0, 1.0);
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.constant"), 1.0);
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.linear"), 0.09);
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.quadratic"), 0.032);
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.cutOff"), std.math.cos(za.toRadians(@as(f32, 12.5))));
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.outerCutOff"), std.math.cos(za.toRadians(@as(f32, 15.0))));
+        gl.uniform1f(obj_shader.getUniformLocation("material.shininess"), 32.0);
+        gl.uniform3f(obj_shader.getUniformLocation("viewPosition"), camera.position.x, camera.position.y, camera.position.z);
 
-        obj_shader.setValue("spotLight.position", camera.position);
-        obj_shader.setValue("spotLight.direction", camera.front);
-        obj_shader.setValue("spotLight.ambient", Vec3.zero());
-        obj_shader.setValue("spotLight.diffuse", Vec3.one());
-        obj_shader.setValue("spotLight.specular", Vec3.one());
-        obj_shader.setValue("spotLight.constant", 1.0);
-        obj_shader.setValue("spotLight.linear", 0.09);
-        obj_shader.setValue("spotLight.quadratic", 0.032);
-        obj_shader.setValue("spotLight.cutOff", std.math.cos(za.toRadians(@as(f32, 12.5))));
-        obj_shader.setValue("spotLight.outerCutOff", std.math.cos(za.toRadians(@as(f32, 15.0))));
-
-        obj_shader.setValue("material.shininess", 32.0);
-
-        obj_shader.setValue("viewPosition", camera.position);
-        obj_shader.setValue("view", view);
-        obj_shader.setValue("projection", projection);
+        gl.uniformMatrix4fv(obj_shader.getUniformLocation("view"), 1, gl.FALSE, view.getData());
+        gl.uniformMatrix4fv(obj_shader.getUniformLocation("projection"), 1, gl.FALSE, projection.getData());
 
         for (cube_positions) |p, i| {
             const model = Mat4.fromTranslate(p).rotate(20.0 * @intToFloat(f32, i), Vec3.new(1.0, 0.3, 0.5));
-            obj_shader.setValue("model", model);
+            gl.uniformMatrix4fv(obj_shader.getUniformLocation("model"), 1, gl.FALSE, model.getData());
             gl.bindVertexArray(vao);
             gl.drawArrays(gl.TRIANGLES, 0, 36);
         }
 
         light_shader.use();
-        light_shader.setValue("view", view);
-        light_shader.setValue("projection", projection);
+        gl.uniformMatrix4fv(light_shader.getUniformLocation("view"), 1, gl.FALSE, view.getData());
+        gl.uniformMatrix4fv(light_shader.getUniformLocation("projection"), 1, gl.FALSE, projection.getData());
         for (point_light_positions) |p| {
             const model = Mat4.fromScale(Vec3.set(0.2)).translate(p);
-            light_shader.setValue("model", model);
+            gl.uniformMatrix4fv(light_shader.getUniformLocation("model"), 1, gl.FALSE, model.getData());
             gl.bindVertexArray(vao);
             gl.drawArrays(gl.TRIANGLES, 0, 36);
         }

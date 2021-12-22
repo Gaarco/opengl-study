@@ -3,7 +3,7 @@ const gl = @import("gl33");
 const c = @import("c.zig");
 const Shader = @import("../Shader.zig");
 const Vertex = @import("vertex.zig").Vertex;
-const Texture = @import("texture.zig");
+const Texture = @import("texture.zig").Texture;
 
 const Mesh = struct {
     vao: c_uint,
@@ -12,11 +12,12 @@ const Mesh = struct {
 
     vertices: []Vertex,
     indices: []u32,
-    textures: []Texture,
+    diffuse_textures: []Texture,
+    specular_textures: []Texture,
 
     const Self = @This();
 
-    pub fn init(vertices: []Vertex, indices: []u32, textures: Texture) Self {
+    pub fn init(vertices: []Vertex, indices: []u32, diffuse_textures: []Texture, specular_textures: []Texture) Self {
         const vao: c_uint = undefined;
         const vbo: c_uint = undefined;
         const ebo: c_uint = undefined;
@@ -31,24 +32,37 @@ const Mesh = struct {
             .ebo = ebo,
             .vertices = vertices,
             .indices = indices,
-            .textures = textures,
+            .diffuse_textures = diffuse_textures,
+            .specular_textures = specular_textures,
         };
         mesh.setupMesh();
         return mesh;
     }
 
-    pub fn draw(self: Self, shader: Shader) void {
-        for (self.textures) |i, t| {
+    pub fn draw(self: Self, allocator: *std.mem.Allocator, shader: Shader) void {
+
+        var tex_count = 0;
+        var i = 0;
+        while (self.diffuse_textures) : ({ i += 1; tex_count += 1; }) {
+            const name = std.fmt.allocPrint(allocator, "material.texture_diffuse{}", .{i});
             gl.activeTexture(gl.TEXTURE0 + i);
-            switch (t.@"type") {
-                .diffuse => {
-                    diff_count += 1;
-                },
-                .specular => {
-                    spec_count += 1;
-                },
-            }
+            gl.uniform1i(shader.getUniformLocation(name), i);
+            gl.bindTexture(gl.TEXTURE_2D, self.diffuse_textures[i].handle);
         }
+
+        i = 0;
+        while (self.specular_textures) : ({ i += 1; tex_count += 1; }) {
+            const name = std.fmt.allocPrint(allocator, "material.texture_diffuse{}", .{i});
+            gl.activeTexture(gl.TEXTURE0 + i);
+            gl.uniform1i(shader.getUniformLocation(name), i);
+            gl.bindTexture(gl.TEXTURE_2D, self.specular_textures[i].handle);
+        }
+
+        gl.activeTexture(gl.TEXTURE0);
+
+        gl.bindVertexArray(self.vao);
+        gl.drawElements(gl.TRIANGLES, self.indices.len, gl.UNSIGNED_INT, @ptrCast(?*c_void, 0));
+        gl.bindVertexArray(0);
     }
 
     fn setupMesh(self: Self) void {
