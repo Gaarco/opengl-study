@@ -1,6 +1,5 @@
 const std = @import("std");
 const gl = @import("gl33");
-const c = @import("c.zig");
 const Shader = @import("../Shader.zig");
 const Vertex = @import("vertex.zig").Vertex;
 const Texture = @import("texture.zig").Texture;
@@ -39,7 +38,7 @@ const Mesh = struct {
         return mesh;
     }
 
-    pub fn draw(self: Self, allocator: *std.mem.Allocator, shader: Shader) void {
+    pub fn draw(self: Self, shader: Shader) void {
 
         var tex_count = 0;
         var i = 0;
@@ -61,7 +60,7 @@ const Mesh = struct {
         gl.activeTexture(gl.TEXTURE0);
 
         gl.bindVertexArray(self.vao);
-        gl.drawElements(gl.TRIANGLES, self.indices.len, gl.UNSIGNED_INT, @ptrCast(?*c_void, 0));
+        gl.drawElements(gl.TRIANGLES, self.indices.len, gl.UNSIGNED_INT, @ptrCast(?*anyopaque, 0));
         gl.bindVertexArray(0);
     }
 
@@ -75,7 +74,7 @@ const Mesh = struct {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, self.indices.len * @sizeOf(u32), &self.indices, gl.STATIC_DRAW);
 
         gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @intToPtr(?*c_void, 0));
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @intToPtr(?*anyopaque, 0));
         gl.enableVertexAttribArray(1);
         gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, @sizeOf(Vertex), @offsetOf(Vertex, "normal"));
         gl.enableVertexAttribArray(2);

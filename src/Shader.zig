@@ -2,7 +2,6 @@ const std = @import("std");
 const gl = @import("gl33");
 const c = @import("c.zig");
 const za = @import("zalgebra");
-const panic = std.debug.panic;
 const Vec3 = za.Vec3;
 const Mat4 = za.Mat4;
 
@@ -39,7 +38,7 @@ pub fn fromMemory(vertex_shader: [*:0]const u8, fragment_shader: [*:0]const u8) 
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
         gl.getShaderInfoLog(vertex_id, info_log.len, null, &info_log);
-        panic("ERROR: Vertex shader compilation failed\n{s}", .{info_log});
+        std.debug.panic("ERROR: Vertex shader compilation failed\n{s}", .{info_log});
     }
 
     const fragment_id = gl.createShader(gl.FRAGMENT_SHADER);
@@ -50,7 +49,7 @@ pub fn fromMemory(vertex_shader: [*:0]const u8, fragment_shader: [*:0]const u8) 
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
         gl.getShaderInfoLog(fragment_id, info_log.len, null, &info_log);
-        panic("ERROR: Fragment shader compilation failed\n{s}", .{info_log});
+        std.debug.panic("ERROR: Fragment shader compilation failed\n{s}", .{info_log});
     }
 
     const handle: gl.GLuint = gl.createProgram();
@@ -62,7 +61,7 @@ pub fn fromMemory(vertex_shader: [*:0]const u8, fragment_shader: [*:0]const u8) 
     if (success == @boolToInt(false)) {
         var info_log: [512]u8 = undefined;
         gl.getProgramInfoLog(handle, info_log.len, null, &info_log);
-        panic("ERROR: Shader linking failed\n{s}", .{info_log});
+        std.debug.panic("ERROR: Shader linking failed\n{s}", .{info_log});
     }
 
     return .{ .handle = handle };

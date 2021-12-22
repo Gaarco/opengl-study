@@ -118,14 +118,14 @@ pub fn main() anyerror!void {
     gl.bufferData(gl.ARRAY_BUFFER, vertices.len * @sizeOf(f32), &vertices, gl.STATIC_DRAW);
 
     gl.bindVertexArray(vao);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*anyopaque, 0));
     gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 3 * @sizeOf(f32)));
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*anyopaque, 3 * @sizeOf(f32)));
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 6 * @sizeOf(f32)));
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*anyopaque, 6 * @sizeOf(f32)));
     gl.enableVertexAttribArray(2);
     gl.bindVertexArray(light_vao);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*c_void, 0));
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * @sizeOf(f32), @intToPtr(?*anyopaque, 0));
     gl.enableVertexAttribArray(0);
 
     var width: c_int = undefined;
@@ -284,7 +284,7 @@ fn processInput(window: ?*c.GLFWwindow, delta_time: f32) void {
     }
 }
 
-fn getProcAddress(ctx: void, entry_point: [:0]const u8) ?*const c_void {
+fn getProcAddress(ctx: void, entry_point: [:0]const u8) ?*const anyopaque {
     _ = ctx;
     return c.glfwGetProcAddress(entry_point);
 }

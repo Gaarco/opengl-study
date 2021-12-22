@@ -20,14 +20,13 @@ pub fn build(b: *std.build.Builder) void {
         },
     }
 
-    exe.addCSourceFile("deps/main.c", &.{"-std=c99"});
     exe.addIncludeDir("deps/");
+    exe.addCSourceFile("deps/main.c", &.{"-std=c99"});
 
     exe.addPackagePath("zalgebra", "deps/zalgebra/src/main.zig");
     exe.addPackagePath("gl33", "deps/gl/gl_3v3.zig");
 
     exe.linkSystemLibrary("glfw3");
-    exe.linkSystemLibrary("assimp");
     exe.linkSystemLibrary("c++");
 
     exe.linkLibC();
