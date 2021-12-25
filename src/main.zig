@@ -214,8 +214,8 @@ pub fn main() anyerror!void {
         gl.uniform1f(obj_shader.getUniformLocation("spotLight.constant"), 1.0);
         gl.uniform1f(obj_shader.getUniformLocation("spotLight.linear"), 0.09);
         gl.uniform1f(obj_shader.getUniformLocation("spotLight.quadratic"), 0.032);
-        gl.uniform1f(obj_shader.getUniformLocation("spotLight.cutOff"), std.math.cos(za.toRadians(@as(f32, 12.5))));
-        gl.uniform1f(obj_shader.getUniformLocation("spotLight.outerCutOff"), std.math.cos(za.toRadians(@as(f32, 15.0))));
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.cutOff"), @cos(za.toRadians(@as(f32, 12.5))));
+        gl.uniform1f(obj_shader.getUniformLocation("spotLight.outerCutOff"), @cos(za.toRadians(@as(f32, 15.0))));
         gl.uniform1f(obj_shader.getUniformLocation("material.shininess"), 32.0);
         gl.uniform3f(obj_shader.getUniformLocation("viewPosition"), camera.position.x, camera.position.y, camera.position.z);
 

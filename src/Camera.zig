@@ -90,9 +90,9 @@ pub fn processMouseScroll(self: *Self, offset_y: f32) void {
 
 fn updateCameraVectors(self: *Self) void {
     var front = Vec3.one();
-    front.x = std.math.cos(zalgebra.toRadians(self.yaw)) * std.math.cos(zalgebra.toRadians(self.pitch));
-    front.y = std.math.sin(zalgebra.toRadians(self.pitch));
-    front.z = std.math.sin(zalgebra.toRadians(self.yaw)) * std.math.cos(zalgebra.toRadians(self.pitch));
+    front.x = @cos(zalgebra.toRadians(self.yaw)) * @cos(zalgebra.toRadians(self.pitch));
+    front.y = @sin(zalgebra.toRadians(self.pitch));
+    front.z = @sin(zalgebra.toRadians(self.yaw)) * @cos(zalgebra.toRadians(self.pitch));
 
     self.front = front.norm();
     self.right = self.front.cross(self.world_up).norm();
